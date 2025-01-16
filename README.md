@@ -14,7 +14,11 @@ npm install
 npm run dev
 The app will be available at http://localhost:3000
 ```
+3. Configure Environment Variables
+Required to connect to the character API:
 
+cp .env.example .env
+```
 ## Theme Customization
 
 1. Locate the theme file: `theme.json`
