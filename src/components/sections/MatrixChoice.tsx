@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Canvas } from '@react-three/fiber';
 import { PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import { supabase } from '@/lib/supabaseClient';
 
 function PillsScene({ onPillClick }: { onPillClick: (pill: 'red' | 'blue') => void }) {
   const bluePillRef = useRef<THREE.Mesh>(null);
@@ -64,7 +65,7 @@ function PillsScene({ onPillClick }: { onPillClick: (pill: 'red' | 'blue') => vo
           onPointerOut={() => handlePillHover('blue', false)}
         >
           <capsuleGeometry args={[0.3, 0.8, 32, 32]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             color="#0066cc"
             metalness={0.7}
             roughness={0.2}
@@ -85,7 +86,7 @@ function PillsScene({ onPillClick }: { onPillClick: (pill: 'red' | 'blue') => vo
           onPointerOut={() => handlePillHover('red', false)}
         >
           <capsuleGeometry args={[0.3, 0.8, 32, 32]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             color="#cc0000"
             metalness={0.7}
             roughness={0.2}
@@ -132,7 +133,7 @@ export default function MatrixChoice() {
     setShowPhoneModal(true);
   };
 
-  const handleSubmitPhone = () => {
+  const handleSubmitPhone = async () => {
     if (!phoneNumber.match(/^\+?[\d\s-]{10,}$/)) {
       toast({
         title: "Invalid phone number",
@@ -142,12 +143,43 @@ export default function MatrixChoice() {
       return;
     }
 
-    toast({
-      title: "Welcome to the real world",
-      description: "You'll receive a call shortly. The truth awaits.",
-    });
-    setShowPhoneModal(false);
-    setPhoneNumber('');
+    try {
+      // SAVE  THE NUMBER TO TABLE IN "calls", 
+      // TODO: CREATE TABLE IN SUPABASE FOR CALLS
+      const { data, error } = await supabase
+        .from('calls')
+        .insert({ phone_number: phoneNumber });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // (B) CALL THE API TO MAKE THE CALL
+      // TODO: SWITCH OUT TO THE ACTUAL ENDPOINT
+      const response = await fetch('https://<ditt-projekt>.functions.supabase.co/callUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to invoke callUser function');
+      }
+
+      toast({
+        title: "Welcome to the real world",
+        description: "You'll receive a call shortly. The truth awaits.",
+      });
+      setShowPhoneModal(false);
+      setPhoneNumber('');
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: err.message || 'Something went wrong',
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePillClick = (pill: 'red' | 'blue') => {
@@ -190,7 +222,7 @@ export default function MatrixChoice() {
           <div className="h-[400px] mb-8">
             <Canvas
               camera={{ position: [0, 0, 5], fov: 45 }}
-              gl={{ 
+              gl={{
                 antialias: true,
                 alpha: true,
                 powerPreference: "high-performance"
@@ -217,7 +249,7 @@ export default function MatrixChoice() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
-              <Button 
+              <Button
                 className="w-full"
                 onClick={handleSubmitPhone}
               >
