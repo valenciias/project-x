@@ -39,7 +39,9 @@ export default function PriceTracker() {
   return (
     <Card className="w-full bg-background/50 backdrop-blur">
       <CardContent className="p-6">
-        <div ref={container} className="w-full h-[220px]" />
+        <div className="w-full h-[400px]" >
+          <iframe height="100%" width="100%" id="geckoterminal-embed" title="GeckoTerminal Embed" src="https://www.geckoterminal.com/solana/pools/44W73kGYQgXCTNkGxUmHv8DDBPCxojBcX49uuKmbFc9U?embed=1&info=1&swaps=1&grayscale=1&light_chart=0" frameBorder="0" allow="clipboard-write" allowFullScreen></iframe>
+        </div>
       </CardContent>
     </Card>
   );
