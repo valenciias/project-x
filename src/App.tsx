@@ -1,33 +1,33 @@
 import { Switch, Route } from "wouter";
 import { useState, useMemo } from "react";
-import Home from "@/pages/Home";
-import IntroAnimation from "@/components/IntroAnimation";
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { clusterApiUrl } from '@solana/web3.js';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import Home from "@/pages/home";
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { Footer } from "./components/Footer";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import Terms from "@/pages/terms";
+import NotFound from "@/pages/not-found";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/toaster";
+import { queryClient } from "./lib/queryClient";
 
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/terms" component={Terms} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
 function App() {
-  const [showIntro, setShowIntro] = useState(true);
-
-  // Setup Solana wallet configuration
-  const endpoint = useMemo(() => clusterApiUrl('mainnet-beta'), []);
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <>
-            {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
-            <Switch>
-              <Route path="/" component={Home} />
-            </Switch>
-          </>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router />
+      <Toaster />
+    </QueryClientProvider>
   );
 }
 
